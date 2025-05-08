@@ -1,26 +1,39 @@
 /**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
+ * CulinaryLens Color Scheme
+ * A modern palette with dark/white theme and green accent
  */
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+const primaryGreen = '#2E7D32';
+const darkGreen = '#1B5E20';
+const lightGreen = '#81C784';
 
 export const Colors = {
   light: {
-    text: '#11181C',
-    background: '#fff',
-    tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
+    text: '#2D3748',
+    background: '#FFFFFF',
+    card: '#F7FAFC',
+    tint: primaryGreen,
+    accent: darkGreen,
+    lighterAccent: lightGreen,
+    icon: '#718096',
+    tabIconDefault: '#A0AEC0',
+    tabIconSelected: primaryGreen,
+    border: '#E2E8F0',
+    notification: '#FF4757',
+    shadow: 'rgba(0, 0, 0, 0.1)',
   },
   dark: {
-    text: '#ECEDEE',
-    background: '#151718',
-    tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
+    text: '#F7FAFC',
+    background: '#1A202C',
+    card: '#2D3748',
+    tint: lightGreen,
+    accent: primaryGreen,
+    lighterAccent: darkGreen,
+    icon: '#A0AEC0',
+    tabIconDefault: '#718096',
+    tabIconSelected: lightGreen,
+    border: '#4A5568',
+    notification: '#FF6B81',
+    shadow: 'rgba(0, 0, 0, 0.3)',
   },
 };
