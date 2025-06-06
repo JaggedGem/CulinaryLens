@@ -5,10 +5,11 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { useColorScheme } from '../hooks/useColorScheme';
+import { FavoritesProvider } from '../hooks/useFavorites';
 
 export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary
+    // Catch any errors thrown by the Layout component.
+    ErrorBoundary
 } from 'expo-router';
 
 export const unstable_settings = {
@@ -48,10 +49,13 @@ function RootLayoutNav() {
 
   return (
     <NavigationThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="preferences" options={{ headerShown: false }} />
-      </Stack>
+      <FavoritesProvider>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="preferences" options={{ headerShown: false }} />
+          <Stack.Screen name="recipe/[id]" options={{ headerShown: false }} />
+        </Stack>
+      </FavoritesProvider>
     </NavigationThemeProvider>
   );
 }
