@@ -6,6 +6,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { useColorScheme } from '../hooks/useColorScheme';
 import { FavoritesProvider } from '../hooks/useFavorites';
+import { GroceryListProvider } from '../hooks/useGroceryList';
 
 export {
     // Catch any errors thrown by the Layout component.
@@ -50,11 +51,13 @@ function RootLayoutNav() {
   return (
     <NavigationThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <FavoritesProvider>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="preferences" options={{ headerShown: false }} />
-          <Stack.Screen name="recipe/[id]" options={{ headerShown: false }} />
-        </Stack>
+        <GroceryListProvider>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="preferences" options={{ headerShown: false }} />
+            <Stack.Screen name="recipe/[id]" options={{ headerShown: false }} />
+          </Stack>
+        </GroceryListProvider>
       </FavoritesProvider>
     </NavigationThemeProvider>
   );

@@ -6,6 +6,7 @@
 const primaryGreen = '#2E7D32';
 const darkGreen = '#1B5E20';
 const lightGreen = '#81C784';
+const successGreen = '#4CAF50';
 
 export const Colors = {
   light: {
@@ -21,6 +22,7 @@ export const Colors = {
     border: '#E2E8F0',
     notification: '#FF4757',
     shadow: 'rgba(0, 0, 0, 0.1)',
+    success: successGreen,
   },
   dark: {
     text: '#F7FAFC',
@@ -35,5 +37,6 @@ export const Colors = {
     border: '#4A5568',
     notification: '#FF6B81',
     shadow: 'rgba(0, 0, 0, 0.3)',
+    success: successGreen,
   },
 };

@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { Image as ExpoImage } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
@@ -11,13 +12,15 @@ import {
     StyleSheet,
     Text,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { SuccessModal } from '../../components/modals';
 import { Colors } from '../../constants/Colors';
 import { useColorScheme } from '../../hooks/useColorScheme';
 import { useFavorites } from '../../hooks/useFavorites';
+import { useGroceryList } from '../../hooks/useGroceryList';
 
 interface RecipeDetail {
   label: string;
@@ -64,10 +67,13 @@ export default function RecipeDetailScreen() {
   const router = useRouter();
   const { id, uri } = useLocalSearchParams();
   const { isFavorite, addFavorite, removeFavorite } = useFavorites();
+  const { addItemsFromRecipe, getRecipeItems } = useGroceryList();
   
   const [recipe, setRecipe] = useState<RecipeDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [addedToGroceries, setAddedToGroceries] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // Check if this recipe is a favorite
   const recipeIsFavorite = id ? isFavorite(id as string) : false;
@@ -150,6 +156,14 @@ export default function RecipeDetailScreen() {
     }
   }, [uri]);
 
+  useEffect(() => {
+    // Check if this recipe's ingredients are in the grocery list
+    if (id && recipe) {
+      const recipeItems = getRecipeItems(id as string);
+      setAddedToGroceries(recipeItems.length > 0);
+    }
+  }, [id, recipe, getRecipeItems]);
+
   const handleGoBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.back();
@@ -176,6 +190,22 @@ export default function RecipeDetailScreen() {
         label: recipe.label,
         image: recipe.image
       });
+    }
+  };
+
+  const handleAddToGroceryList = () => {
+    if (!recipe || !id) return;
+
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    
+    if (recipe.ingredientLines && recipe.ingredientLines.length > 0) {
+      addItemsFromRecipe(
+        id as string,
+        recipe.label,
+        recipe.ingredientLines
+      );
+      setAddedToGroceries(true);
+      setShowSuccessModal(true);
     }
   };
 
@@ -232,30 +262,54 @@ export default function RecipeDetailScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Hero Image */}
-        <View style={[styles.imageContainer, { paddingTop: insets.top }]}>
+        <View style={styles.imageContainer}>
           <ExpoImage
             source={{ uri: recipe.image }}
             style={styles.heroImage}
             contentFit="cover"
             transition={500}
           />
+          
+          {/* Gradient overlay at the top */}
+          <LinearGradient
+            colors={['rgba(0,0,0,0.6)', 'transparent']}
+            style={[styles.gradient, { height: insets.top + 60 }]}
+          />
+          
           <TouchableOpacity 
-            style={[styles.backIconButton, { backgroundColor: colors.background + 'CC' }]}
+            style={[styles.backIconButton, { 
+              top: insets.top + 10 
+            }]}
             onPress={handleGoBack}
           >
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
+            <Ionicons name="arrow-back" size={24} color="white" />
           </TouchableOpacity>
           
-          <TouchableOpacity
-            style={[styles.favoriteButton, { backgroundColor: colors.background + 'CC' }]}
-            onPress={toggleFavorite}
-          >
-            <Ionicons 
-              name={recipeIsFavorite ? "heart" : "heart-outline"} 
-              size={24} 
-              color={recipeIsFavorite ? colors.notification : colors.text} 
-            />
-          </TouchableOpacity>
+          <View style={[styles.headerActions, {
+            top: insets.top + 10
+          }]}>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={toggleFavorite}
+            >
+              <Ionicons 
+                name={recipeIsFavorite ? "heart" : "heart-outline"} 
+                size={24} 
+                color={recipeIsFavorite ? colors.notification : "white"} 
+              />
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={handleAddToGroceryList}
+            >
+              <Ionicons 
+                name={addedToGroceries ? "cart" : "cart-outline"} 
+                size={24} 
+                color={addedToGroceries ? colors.tint : "white"} 
+              />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Recipe Content */}
@@ -377,8 +431,35 @@ export default function RecipeDetailScreen() {
               <Text style={styles.viewSourceText}>View Original</Text>
             </TouchableOpacity>
           </View>
+          
+          {/* Add to Grocery List Button */}
+          <TouchableOpacity
+            style={[styles.addToGroceryButton, { backgroundColor: addedToGroceries ? colors.success : colors.tint }]}
+            onPress={handleAddToGroceryList}
+          >
+            <Ionicons 
+              name={addedToGroceries ? "cart" : "cart-outline"} 
+              size={24} 
+              color="white" 
+              style={styles.addToGroceryIcon}
+            />
+            <Text style={styles.addToGroceryText}>
+              {addedToGroceries ? 'Added to Grocery List' : 'Add to Grocery List'}
+            </Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
+
+      <SuccessModal
+        visible={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        title="Added to Grocery List"
+        message={recipe ? `${recipe.ingredientLines?.length} ingredients from "${recipe.label}" have been added to your grocery list.` : ''}
+        icon="cart"
+        buttonText="View Grocery List"
+        autoClose={false}
+        onButtonPress={() => router.navigate('/(tabs)/groceries')}
+      />
     </View>
   );
 }
@@ -429,25 +510,33 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 30,
+    paddingTop: 0,
   },
   imageContainer: {
     width: '100%',
-    height: 300,
+    height: 350,
     position: 'relative',
   },
   heroImage: {
     width: '100%',
     height: '100%',
   },
+  gradient: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    zIndex: 5,
+  },
   backIconButton: {
     position: 'absolute',
-    top: 50,
     left: 20,
     width: 40,
     height: 40,
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 10,
   },
   contentContainer: {
     padding: 20,
@@ -567,14 +656,36 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 16,
   },
-  favoriteButton: {
+  headerActions: {
+    flexDirection: 'row',
     position: 'absolute',
-    top: 50,
-    right: 20,
+    top: 10,
+    right: 15,
+    zIndex: 10,
+  },
+  actionButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    marginLeft: 10,
+  },
+  addToGroceryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 12,
+    marginTop: 20,
+    marginBottom: 10,
+  },
+  addToGroceryIcon: {
+    marginRight: 8,
+  },
+  addToGroceryText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
   },
 }); 
